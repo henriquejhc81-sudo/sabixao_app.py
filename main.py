@@ -1,12 +1,5 @@
 import asyncio
 import os
-# Comando forçado para instalar o navegador invisível caso ele não exista no servidor
-try:
-    import playwright
-    # Executa a instalação silenciosa do Chromium direto no servidor Linux
-    os.system("python -m playwright install chromium")
-except Exception:
-    pass
 
 from orquestrador import OrquestradorMaster
 from varredura_invisivel import VarredorInvisivel
@@ -40,9 +33,9 @@ class SabixaoSistemaUniversal:
 
         if not questao_final:
             print("[-] Nenhuma pergunta ou imagem foi fornecida ao sistema.")
-            return
+            return "[Aviso] Nenhuma diretriz de dados ou questão foi fornecida ao Sabixão."
 
-        # Passo 2: Varredura furtiva e invisível nos concorrentes de mercado
+        # Passo 2: Varredura furtiva e invisível leve via API HTTP pública
         try:
             dados_capturados = await self.varredor.pesquisar_no_perplexity(questao_final)
         except Exception as e:
@@ -59,11 +52,6 @@ class SabixaoSistemaUniversal:
 
 # Bloco de execução principal do sistema
 if __name__ == "__main__":
-    # Instancia o Sabixão
     sistema = SabixaoSistemaUniversal()
-    
-    # Exemplo 1: Processando uma dúvida complexa de conhecimentos gerais via texto
-    pergunta = "Explique a teoria das cordas de forma simples e compare com a visão da computação quântica."
-    
-    # Executa o loop assíncrono exigido pelo motor do Playwright
+    pergunta = "Qual é o impacto exato da fusão de dados na física quântica atual?"
     asyncio.run(sistema.processar_requisicao(pergunta_texto=pergunta))

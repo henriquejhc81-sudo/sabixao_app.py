@@ -3,14 +3,14 @@ import asyncio
 import os
 from main import SabixaoSistemaUniversal
 
-# Configuração da página Premium Futurista
+# Configuração da página Premium Futurista Quantum
 st.set_page_config(
     page_title="Sabixão Quantum Search",
     page_icon="🧠",
     layout="centered"
 )
 
-# Estilização Neon Sci-Fi HUD Avançada
+# Estilização Neon Sci-Fi HUD Avançada v2.6
 st.markdown("""
     <style>
     /* Fundo Escuro Espacial Profundo */
@@ -68,9 +68,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Identidade Visual Cyberpunk
+# Identidade Visual Cyberpunk Centralizada v2.6 (Homenagem ao Upgrade NEXUS)
 st.markdown("<h1 style='text-align: center; font-size: 5rem; font-weight: 900; background: linear-gradient(to right, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0px; filter: drop-shadow(0 0 15px rgba(0,242,254,0.3));'>SABIXÃO</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 40px;'>QUANTUM ORCHESTRATION SYSTEM v2.5</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 10px;'>QUANTUM OMNI SYSTEM v2.6</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #8b949e; font-family: monospace; font-size: 11px; margin-bottom: 40px;'>[ACEITA: TEXTO PRIVADO • ARQUIVOS MULTIMÍDIA • LINKS DA WEB • VÍDEOS YOUTUBE]</p>", unsafe_allow_html=True)
 
 @st.cache_resource
 def inicializar_sistema():
@@ -83,7 +84,7 @@ if "modo_camera" not in st.session_state: st.session_state.modo_camera = False
 if "modo_arquivo" not in st.session_state: st.session_state.modo_arquivo = False
 
 # Input Principal
-pergunta_input = st.text_area("", placeholder="[CONEXÃO SEGURA] Entre com a diretriz ou questão universal...", label_visibility="collapsed")
+pergunta_input = st.text_area("", placeholder="[CONEXÃO SEGURA] Entre com a diretriz, links do YouTube ou questão universal...", label_visibility="collapsed")
 
 # Grid de Controles de Entrada (Design Estilo Painel de Navegação)
 col_cam, col_file, col_search = st.columns([1, 1, 1.5])

@@ -1,4 +1,4 @@
-google-generativeai==0.8.3
-groq==0.9.0
-playwright==1.49.0
-opencv-python-headless==4.10.0.84
+google-generativeai
+groq
+playwright
+opencv-python-headless

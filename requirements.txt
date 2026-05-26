@@ -1,4 +1,5 @@
 google-generativeai
 groq
-playwright
+duckduckgo_search
 opencv-python-headless
+streamlit

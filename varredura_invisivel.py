@@ -31,8 +31,9 @@ class VarredorInvisivel:
             # Inicializa o navegador em modo 'headless' (oculto) com flags anti-detecção
             browser = await p.chromium.launch(
                 headless=True,
-                args=["--disable-blink-features=AutomationControlled"]
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-setuid-sandbox"]
             )
+
             
             # Define o contexto simulando uma tela residencial padrão
             context = await browser.new_context(

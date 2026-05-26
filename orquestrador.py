@@ -1,75 +1,70 @@
 import os
-import random
 import streamlit as st
 from google import generativeai as gemini
 from groq import Groq
 
 class OrquestradorMaster:
     def __init__(self):
-        # Transplante tecnológico: Captura as chaves diretamente do cofre oculto Secrets do Streamlit Cloud
-        self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY"))
-        self.groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+        # Captura as chaves diretamente do cofre Secrets do Streamlit Cloud de forma nativa e limpa
+        self.gemini_key = st.secrets.get("GEMINI_API_KEY", "")
+        self.groq_key = st.secrets.get("GROQ_API_KEY", "")
         
-        # Inicializa o cliente Groq se a chave secreta estiver ativa
         self.groq_client = Groq(api_key=self.groq_key) if self.groq_key else None
-        
-        # Inicializa a infraestrutura Google se a chave secreta estiver ativa
         if self.gemini_key:
             gemini.configure(api_key=self.gemini_key)
 
     def _processar_via_gemini(self, prompt: str) -> str:
-        """Processamento profundo via modelo nativo gratuito do Gemini."""
         if not self.gemini_key:
-            raise ValueError("Chave do Gemini não localizada no cofre.")
-        
+            raise ValueError("Chave Gemini ausente.")
         model = gemini.GenerativeModel("gemini-1.5-flash")
         resposta = model.generate_content(prompt)
-        return resposta.text
+        return list(resposta.text) if hasattr(resposta.text, 'text') else str(resposta.text)
 
     def _processar_via_groq(self, prompt: str) -> str:
-        """Processamento ultraveloz na arquitetura LPU da Groq."""
         if not self.groq_client:
-            raise ValueError("Chave da Groq não localizada no cofre.")
-        
+            raise ValueError("Chave Groq ausente.")
         chat_completion = self.groq_client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            model="llama3-70b-8192",
+            model="llama-3.3-70b-versatile",
+            temperature=0.1
         )
-        return chat_completion.choices.message.content
+        return chat_completion.choices[0].message.content
 
     def ejecutar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
-        """
-        Aplica o efeito Hidra de Lerna.
-        Se um nó falhar por limite de requisições, o outro assume imediatamente em segundo plano.
-        """
+        # Garante a atualização das chaves antes do processamento neural
+        self.gemini_key = st.secrets.get("GEMINI_API_KEY", "")
+        self.groq_key = st.secrets.get("GROQ_API_KEY", "")
+        if self.gemini_key: gemini.configure(api_key=self.gemini_key)
+        if self.groq_key and not self.groq_client: self.groq_client = Groq(api_key=self.groq_key)
+
         prompt_final = (
-            f"Você é o Sabixão, analista master definitivo.\n"
-            f"Analise o problema do usuário com base nos dados coletados na internet.\n\n"
+            f"Você é o Sabixão, inteligência analítica master superior planetária.\n"
+            f"Sua missão é resolver o problema do usuário analisando minuciosamente os dados coletados na internet.\n\n"
             f"Problema do Usuário: {questao_usuario}\n"
-            f"Dados Brutos Coletados: {dados_da_internet}\n\n"
-            f"Instrução: Filtre erros, resuma os pontos críticos e responda de forma "
-            f"extremamente inteligente, clara e idêntica a um humano experiente."
+            f"Evidências e Dados Coletados da Internet:\n{dados_da_internet}\n\n"
+            f"Instrução Técnica: Filtre contradições, remova alucinações e gere uma resposta "
+            f"definitiva, extremamente inteligente, detalhada e em tom natural humano."
         )
 
-        # Cabeça 1 da Hidra: Tenta puxar a inteligência do Google Gemini
-        try:
-            if not self.gemini_key:
-                raise ValueError("Nó Gemini inativo.")
-            print("[Hidra - Cabeça 1] Enviando para análise profunda do Gemini...")
-            return self._processar_via_gemini(prompt_final)
-            
-        except Exception as erro_gemini:
-            print(f"[-] Cabeça 1 (Gemini) indisponível: {erro_gemini}")
-            print("[Hidra - Cabeça 2] Ativando LPU Groq / Llama 3 imediatamente...")
-            
-            # Cabeça 2 da Hidra: Contingência instantânea via Groq LPU
+        # Cabeça 1 da Hidra: Aciona a infraestrutura Groq de altíssima velocidade
+        if self.groq_key:
             try:
-                if not self.groq_key:
-                    raise ValueError("Nó Groq inativo.")
+                print("[Hidra] Disparando nó Groq...")
                 return self._processar_via_groq(prompt_final)
-            except Exception as erro_groq:
-                # Retorno de segurança caso ocorra queda global em ambas as pontas externas
-                return (
-                    f"[Modo Sobrevivência] Ambas as APIs principais falharam temporariamente por limite de cota.\n"
-                    f"Análise local baseada nos fragmentos coletados na internet:\n\n{dados_da_internet}"
-                )
+            except Exception as e:
+                print(f"[-] Nó Groq falhou: {e}")
+
+        # Cabeça 2 da Hidra: Contingência instantânea via Google Gemini
+        if self.gemini_key:
+            try:
+                print("[Hidra] Acionando nó Gemini...")
+                return self._processar_via_gemini(prompt_final)
+            except Exception as e:
+                print(f"[-] Nó Gemini falhou: {e}")
+
+        # Retorno caso as cotas de testes gratuitos estejam zeradas na nuvem
+        return (
+            f"[Análise de Contingência Local Ativada]\n\n"
+            f"O sistema realizou a varredura mas as APIs externas estão em manutenção de cota.\n"
+            f"Aqui estão os dados extraídos diretamente da rede para a sua análise:\n\n{dados_da_internet}"
+        )

@@ -18,7 +18,7 @@ class OrquestradorMaster:
             raise ValueError("Chave Gemini ausente.")
         model = gemini.GenerativeModel("gemini-1.5-flash")
         resposta = model.generate_content(prompt)
-        return list(resposta.text) if hasattr(resposta.text, 'text') else str(resposta.text)
+        return resposta.text
 
     def _processar_via_groq(self, prompt: str) -> str:
         if not self.groq_client:
@@ -28,18 +28,20 @@ class OrquestradorMaster:
             model="llama-3.3-70b-versatile",
             temperature=0.1
         )
-        return chat_completion.choices[0].message.content
+        return chat_completion.choices.message.content
 
     def ejecutar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
         # Garante a atualização das chaves antes do processamento neural
         self.gemini_key = st.secrets.get("GEMINI_API_KEY", "")
         self.groq_key = st.secrets.get("GROQ_API_KEY", "")
-        if self.gemini_key: gemini.configure(api_key=self.gemini_key)
-        if self.groq_key and not self.groq_client: self.groq_client = Groq(api_key=self.groq_key)
+        if self.gemini_key: 
+            gemini.configure(api_key=self.gemini_key)
+        if self.groq_key and not self.groq_client: 
+            self.groq_client = Groq(api_key=self.groq_key)
 
         prompt_final = (
             f"Você é o Sabixão, inteligência analítica master superior planetária.\n"
-            f"Sua missão é resolver o problema do usuário analisando minuciosamente os dados coletados na internet.\n\n"
+            f"Sua missão é resolver o problem do usuário analisando minuciosamente os dados coletados na internet.\n\n"
             f"Problema do Usuário: {questao_usuario}\n"
             f"Evidências e Dados Coletados da Internet:\n{dados_da_internet}\n\n"
             f"Instrução Técnica: Filtre contradições, remova alucinações e gere uma resposta "

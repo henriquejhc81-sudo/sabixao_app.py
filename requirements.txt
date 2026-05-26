@@ -3,3 +3,5 @@ groq
 duckduckgo_search
 opencv-python-headless
 streamlit
+beautifulsoup4
+youtube_transcript_api

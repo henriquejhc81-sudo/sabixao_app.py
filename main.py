@@ -1,5 +1,13 @@
 import asyncio
 import os
+# Comando forçado para instalar o navegador invisível caso ele não exista no servidor
+try:
+    import playwright
+    # Executa a instalação silenciosa do Chromium direto no servidor Linux
+    os.system("python -m playwright install chromium")
+except Exception:
+    pass
+
 from orquestrador import OrquestradorMaster
 from varredura_invisivel import VarredorInvisivel
 from percepcao_visao import PercepcaoVisao

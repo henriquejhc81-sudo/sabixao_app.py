@@ -13,10 +13,9 @@ class OrquestradorMaster:
         if self.gemini_key:
             gemini.configure(api_key=self.gemini_key)
 
-    # PROTOCOLO DE AUTOCURA: Tenta 3 vezes antes de falhar
     def _processar_via_gemini(self, prompt: str, tentativas=3) -> str:
         if not self.gemini_key:
-            raise ValueError("Chave Gemini ausente.")
+            raise ValueError("Chave Gemini vazia ou não encontrada no Streamlit Secrets.")
         model = gemini.GenerativeModel("gemini-1.5-flash")
         
         for tentativa in range(tentativas):
@@ -24,15 +23,13 @@ class OrquestradorMaster:
                 resposta = model.generate_content(prompt)
                 return resposta.text
             except Exception as e:
-                print(f"[Autocura Gemini] Falha na tentativa {tentativa + 1}: {e}")
                 if tentativa == tentativas - 1:
                     raise e
-                time.sleep(2) # Espera 2 segundos e tenta se reconectar
+                time.sleep(2)
 
-    # PROTOCOLO DE AUTOCURA: Tenta 3 vezes antes de falhar
     def _processar_via_groq(self, prompt: str, tentativas=3) -> str:
         if not self.groq_client:
-            raise ValueError("Chave Groq ausente.")
+            raise ValueError("Chave Groq vazia ou não encontrada no Streamlit Secrets.")
             
         for tentativa in range(tentativas):
             try:
@@ -43,10 +40,9 @@ class OrquestradorMaster:
                 )
                 return chat_completion.choices.message.content
             except Exception as e:
-                print(f"[Autocura Groq] Falha na tentativa {tentativa + 1}: {e}")
                 if tentativa == tentativas - 1:
                     raise e
-                time.sleep(2) # Espera 2 segundos e tenta se reconectar
+                time.sleep(2)
 
     def executar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
         self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
@@ -75,22 +71,32 @@ class OrquestradorMaster:
             f"Sintetize a resposta e converse com o usuário agora:"
         )
 
+        erro_groq = "Não testado."
+        erro_gemini = "Não testado."
+
         if self.groq_key:
             try:
-                print("[Hidra] Disparando nó de Raciocínio Groq...")
                 return self._processar_via_groq(prompt_final)
             except Exception as e:
-                print(f"[-] Todos os nós de cura Groq falharam: {e}")
+                erro_groq = str(e)
+        else:
+            erro_groq = "Nenhuma chave GROQ_API_KEY detectada na nuvem."
 
         if self.gemini_key:
             try:
-                print("[Hidra] Acionando nó de Contingência Gemini...")
                 return self._processar_via_gemini(prompt_final)
             except Exception as e:
-                print(f"[-] Todos os nós de cura Gemini falharam: {e}")
+                erro_gemini = str(e)
+        else:
+            erro_gemini = "Nenhuma chave GEMINI_API_KEY detectada na nuvem."
 
+        # O RAIO-X FINAL (Vai aparecer direto na interface)
         return (
-            f"Poxa, mestre. Minhas conexões neurais externas estão em manutenção agora e a Autocura não deu conta. "
-            f"Parece que as chaves de acesso (API Keys) não foram carregadas na nuvem. Verifique o painel do Streamlit Cloud!\n\n"
-            f"Anotações cruas extraídas da rede:\n{dados_da_internet}"
+            f"⚠️ **FALHA CRÍTICA NAS CONEXÕES NEURAIS (RAIO-X)** ⚠️\n\n"
+            f"O sistema tentou se conectar, mas foi bloqueado pelos servidores externos. "
+            f"Por favor, verifique os erros exatos abaixo:\n\n"
+            f"🔴 **Erro na Groq Llama 3:** `{erro_groq}`\n"
+            f"🔵 **Erro no Google Gemini:** `{erro_gemini}`\n\n"
+            f"---\n"
+            f"*(Anotações cruas extraídas da rede para backup)*:\n{dados_da_internet}"
         )

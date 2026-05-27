@@ -23,13 +23,12 @@ st.markdown("""
     }
     div.stButton > button:hover { transform: translateY(-2px) !important; box-shadow: 0 0 25px rgba(0, 242, 254, 0.8) !important; color: #ffffff !important; }
     .sub-panel { background-color: rgba(30, 41, 59, 0.5); border: 1px dashed #4facfe; padding: 20px; border-radius: 12px; margin-top: 15px; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(79, 172, 254, 0.1); }
-    /* Estilização do balão de chat */
     .stChatMessage { background-color: rgba(15, 23, 42, 0.5); border-radius: 10px; border-left: 3px solid #00f2fe; margin-bottom: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 style='text-align: center; font-size: 5rem; font-weight: 900; background: linear-gradient(to right, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0px; filter: drop-shadow(0 0 15px rgba(0,242,254,0.3));'>SABIXÃO</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 10px;'>QUANTUM OMNI SYSTEM v2.7</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 10px;'>QUANTUM OMNI SYSTEM v2.8 (AUTO-HEAL)</p>", unsafe_allow_html=True)
 
 @st.cache_resource
 def inicializar_sistema():
@@ -41,12 +40,12 @@ if "modo_camera" not in st.session_state: st.session_state.modo_camera = False
 if "modo_arquivo" not in st.session_state: st.session_state.modo_arquivo = False
 if "messages" not in st.session_state: st.session_state.messages = []
 
-# Exibe o histórico de chat na tela
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-pergunta_input = st.text_area("", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links ou faça perguntas...", label_visibility="collapsed")
+# CORREÇÃO DA TELA: Adicionado o nome "Diretriz" no primeiro parâmetro para evitar o Erro de Label Empty
+pergunta_input = st.text_area("Diretriz", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links ou faça perguntas...", label_visibility="collapsed")
 col_cam, col_file, col_search = st.columns([1, 1, 1.5])
 
 with col_cam:
@@ -80,15 +79,11 @@ if st.session_state.modo_arquivo:
 if executar_busca:
     if pergunta_input or midia_para_processar:
         texto_exibicao = pergunta_input if pergunta_input else "[Arquivo Enviado]"
-        
-        # Adiciona a mensagem do usuário no chat
         st.session_state.messages.append({"role": "user", "content": texto_exibicao})
-        st.rerun() # Atualiza a tela para mostrar a bolha do usuário
-        
+        st.rerun() 
     else:
         st.warning("Fale algo comigo ou envie um arquivo para analisarmos.")
 
-# Gatilho de Processamento da Resposta do Sabixão
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     ultima_mensagem = st.session_state.messages[-1]["content"]
     
@@ -98,11 +93,10 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 f.write(midia_para_processar)
             resposta = asyncio.run(sabixao.processar_requisicao(pergunta_texto=ultima_mensagem, caminho_imagem=caminho_temporario))
             if os.path.exists(caminho_temporario): os.remove(caminho_temporario)
-            midia_para_processar = None # Reseta a mídia
+            midia_para_processar = None 
         else:
             resposta = asyncio.run(sabixao.processar_requisicao(pergunta_texto=ultima_mensagem))
         
-        # Adiciona a resposta humanizada do Sabixão no chat
         st.session_state.messages.append({"role": "assistant", "content": resposta})
         st.rerun()
 

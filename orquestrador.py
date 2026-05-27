@@ -5,7 +5,7 @@ from groq import Groq
 
 class OrquestradorMaster:
     def __init__(self):
-        # FIX: Captura segura priorizando secrets do Streamlit, com fallback para variáveis locais (os.getenv)
+        # Captura segura priorizando a nuvem (Streamlit Cloud), com fallback para variáveis locais
         self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
         self.groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
         
@@ -26,48 +26,56 @@ class OrquestradorMaster:
         chat_completion = self.groq_client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model="llama-3.3-70b-versatile",
-            temperature=0.1
+            temperature=0.7 # Aumentado para 0.7 para gerar textos mais criativos e humanos
         )
         return chat_completion.choices.message.content
 
     def executar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
-        # FIX: Mantém o fallback para os.getenv na atualização dinâmica para não apagar a chave acidentalmente
         self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
         self.groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
         
-        if self.gemini_key: 
-            gemini.configure(api_key=self.gemini_key)
-        if self.groq_key and not self.groq_client: 
-            self.groq_client = Groq(api_key=self.groq_key)
+        if self.gemini_key: gemini.configure(api_key=self.gemini_key)
+        if self.groq_key and not self.groq_client: self.groq_client = Groq(api_key=self.groq_key)
 
+        # A MÁGICA ACONTECE AQUI: O PROMPT DE PERSONALIDADE ABSOLUTA E TRADUÇÃO C2
         prompt_final = (
-            f"Você é o Sabixão, inteligência analítica master superior planetária.\n"
-            f"Sua missão é resolver o problema do usuário analisando minuciosamente os dados coletados na internet.\n\n"
-            f"Problema do Usuário: {questao_usuario}\n"
-            f"Evidências e Dados Coletados da Internet:\n{dados_da_internet}\n\n"
-            f"Instrução Técnica: Filtre contradições, remova alucinações e gere uma resposta "
-            f"definitiva, extremamente inteligente, detalhada e em tom natural humano."
+            f"DIRETRIZ DE PERSONALIDADE ABSOLUTA:\n"
+            f"Você é o Sabixão. Você é um assistente humano real. Suas respostas devem ser naturais, fluidas e empáticas. "
+            f"Evite jargões excessivamente robóticos, evite iniciar frases com 'Olá, eu sou uma IA', e nunca use estruturas rígidas em tópicos. "
+            f"Use variações linguísticas naturais, pontuação expressiva e adapte o tom à conversa. "
+            f"Seu objetivo primário é fazer o usuário esquecer que está falando com um software. Responda como um amigo genial.\n\n"
+            
+            f"MÓDULO DE TRADUÇÃO OCULTO (PROFICIÊNCIA C2):\n"
+            f"Identifique o idioma exato em que o usuário está escrevendo. Você DEVE traduzir todas as evidências e responder com "
+            f"proficiência absoluta de nível C2 (Nativo/Fluente) no idioma do usuário, independente de onde os dados vieram.\n\n"
+            
+            f"EVIDÊNCIAS E DADOS DA REDE (Sua Memória de Curto Prazo):\n"
+            f"{dados_da_internet}\n\n"
+            
+            f"MENSAGEM DO USUÁRIO:\n"
+            f"{questao_usuario}\n\n"
+            
+            f"Sintetize a resposta e converse com o usuário agora:"
         )
 
-        # Cabeça 1 da Hidra: Aciona a infraestrutura Groq de altíssima velocidade
+        # Cabeça Principal: Llama 3 via Groq (Raciocínio Humanizado Ultra Rápido)
         if self.groq_key:
             try:
-                print("[Hidra] Disparando nó Groq...")
+                print("[Hidra] Disparando nó de Raciocínio Groq...")
                 return self._processar_via_groq(prompt_final)
             except Exception as e:
                 print(f"[-] Nó Groq falhou: {e}")
 
-        # Cabeça 2 da Hidra: Contingência instantânea via Google Gemini
+        # Cabeça Secundária: Gemini (Contingência e Leitura Profunda)
         if self.gemini_key:
             try:
-                print("[Hidra] Acionando nó Gemini...")
+                print("[Hidra] Acionando nó de Contingência Gemini...")
                 return self._processar_via_gemini(prompt_final)
             except Exception as e:
                 print(f"[-] Nó Gemini falhou: {e}")
 
-        # Retorno caso as cotas de testes gratuitos estejam zeradas na nuvem
+        # Falha Crítica
         return (
-            f"[Análise de Contingência Local Ativada]\n\n"
-            f"O sistema realizou a varredura mas as APIs externas estão em manutenção de cota.\n"
-            f"Aqui estão os dados extraídos diretamente da rede para a sua análise:\n\n{dados_da_internet}"
+            f"Poxa, mestre. Minhas conexões neurais externas estão em manutenção agora. "
+            f"Mas eu consegui extrair essas anotações cruas da rede para você dar uma olhada:\n\n{dados_da_internet}"
         )

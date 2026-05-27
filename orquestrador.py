@@ -1,11 +1,11 @@
 import os
+import time
 import streamlit as st
 from google import generativeai as gemini
 from groq import Groq
 
 class OrquestradorMaster:
     def __init__(self):
-        # Captura segura priorizando a nuvem (Streamlit Cloud), com fallback para variáveis locais
         self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
         self.groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
         
@@ -13,22 +13,40 @@ class OrquestradorMaster:
         if self.gemini_key:
             gemini.configure(api_key=self.gemini_key)
 
-    def _processar_via_gemini(self, prompt: str) -> str:
+    # PROTOCOLO DE AUTOCURA: Tenta 3 vezes antes de falhar
+    def _processar_via_gemini(self, prompt: str, tentativas=3) -> str:
         if not self.gemini_key:
             raise ValueError("Chave Gemini ausente.")
         model = gemini.GenerativeModel("gemini-1.5-flash")
-        resposta = model.generate_content(prompt)
-        return resposta.text
+        
+        for tentativa in range(tentativas):
+            try:
+                resposta = model.generate_content(prompt)
+                return resposta.text
+            except Exception as e:
+                print(f"[Autocura Gemini] Falha na tentativa {tentativa + 1}: {e}")
+                if tentativa == tentativas - 1:
+                    raise e
+                time.sleep(2) # Espera 2 segundos e tenta se reconectar
 
-    def _processar_via_groq(self, prompt: str) -> str:
+    # PROTOCOLO DE AUTOCURA: Tenta 3 vezes antes de falhar
+    def _processar_via_groq(self, prompt: str, tentativas=3) -> str:
         if not self.groq_client:
             raise ValueError("Chave Groq ausente.")
-        chat_completion = self.groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.3-70b-versatile",
-            temperature=0.7 # Aumentado para 0.7 para gerar textos mais criativos e humanos
-        )
-        return chat_completion.choices.message.content
+            
+        for tentativa in range(tentativas):
+            try:
+                chat_completion = self.groq_client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.7 
+                )
+                return chat_completion.choices.message.content
+            except Exception as e:
+                print(f"[Autocura Groq] Falha na tentativa {tentativa + 1}: {e}")
+                if tentativa == tentativas - 1:
+                    raise e
+                time.sleep(2) # Espera 2 segundos e tenta se reconectar
 
     def executar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
         self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
@@ -37,7 +55,6 @@ class OrquestradorMaster:
         if self.gemini_key: gemini.configure(api_key=self.gemini_key)
         if self.groq_key and not self.groq_client: self.groq_client = Groq(api_key=self.groq_key)
 
-        # A MÁGICA ACONTECE AQUI: O PROMPT DE PERSONALIDADE ABSOLUTA E TRADUÇÃO C2
         prompt_final = (
             f"DIRETRIZ DE PERSONALIDADE ABSOLUTA:\n"
             f"Você é o Sabixão. Você é um assistente humano real. Suas respostas devem ser naturais, fluidas e empáticas. "
@@ -58,24 +75,22 @@ class OrquestradorMaster:
             f"Sintetize a resposta e converse com o usuário agora:"
         )
 
-        # Cabeça Principal: Llama 3 via Groq (Raciocínio Humanizado Ultra Rápido)
         if self.groq_key:
             try:
                 print("[Hidra] Disparando nó de Raciocínio Groq...")
                 return self._processar_via_groq(prompt_final)
             except Exception as e:
-                print(f"[-] Nó Groq falhou: {e}")
+                print(f"[-] Todos os nós de cura Groq falharam: {e}")
 
-        # Cabeça Secundária: Gemini (Contingência e Leitura Profunda)
         if self.gemini_key:
             try:
                 print("[Hidra] Acionando nó de Contingência Gemini...")
                 return self._processar_via_gemini(prompt_final)
             except Exception as e:
-                print(f"[-] Nó Gemini falhou: {e}")
+                print(f"[-] Todos os nós de cura Gemini falharam: {e}")
 
-        # Falha Crítica
         return (
-            f"Poxa, mestre. Minhas conexões neurais externas estão em manutenção agora. "
-            f"Mas eu consegui extrair essas anotações cruas da rede para você dar uma olhada:\n\n{dados_da_internet}"
+            f"Poxa, mestre. Minhas conexões neurais externas estão em manutenção agora e a Autocura não deu conta. "
+            f"Parece que as chaves de acesso (API Keys) não foram carregadas na nuvem. Verifique o painel do Streamlit Cloud!\n\n"
+            f"Anotações cruas extraídas da rede:\n{dados_da_internet}"
         )

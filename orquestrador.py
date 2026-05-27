@@ -5,9 +5,9 @@ from groq import Groq
 
 class OrquestradorMaster:
     def __init__(self):
-        # Captura as chaves diretamente do cofre Secrets do Streamlit Cloud de forma nativa e limpa
-        self.gemini_key = st.secrets.get("GEMINI_API_KEY", "")
-        self.groq_key = st.secrets.get("GROQ_API_KEY", "")
+        # FIX: Captura segura priorizando secrets do Streamlit, com fallback para variáveis locais (os.getenv)
+        self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+        self.groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
         
         self.groq_client = Groq(api_key=self.groq_key) if self.groq_key else None
         if self.gemini_key:
@@ -31,9 +31,10 @@ class OrquestradorMaster:
         return chat_completion.choices.message.content
 
     def executar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
-        # Garante a atualização das chaves antes do processamento neural
-        self.gemini_key = st.secrets.get("GEMINI_API_KEY", "")
-        self.groq_key = st.secrets.get("GROQ_API_KEY", "")
+        # FIX: Mantém o fallback para os.getenv na atualização dinâmica para não apagar a chave acidentalmente
+        self.gemini_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+        self.groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY", ""))
+        
         if self.gemini_key: 
             gemini.configure(api_key=self.gemini_key)
         if self.groq_key and not self.groq_client: 

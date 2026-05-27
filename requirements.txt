@@ -1,7 +1,9 @@
 google-generativeai
 groq
-duckduckgo_search
+duckduckgo-search
 opencv-python-headless
 streamlit
 beautifulsoup4
-youtube_transcript_api
+youtube-transcript-api
+Pillow
+requests

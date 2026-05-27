@@ -28,17 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 style='text-align: center; font-size: 5rem; font-weight: 900; background: linear-gradient(to right, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0px; filter: drop-shadow(0 0 15px rgba(0,242,254,0.3));'>SABIXÃO</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 10px;'>QUANTUM OMNI SYSTEM v2.9 (SECURE SHIELD)</p>", unsafe_allow_html=True)
-
-# 🛡️ Painel Neural de Contingência (Barra Lateral Segura)
-with st.sidebar:
-    st.markdown("### 🔐 PAINEL NEURAL SECRETO")
-    st.markdown("*(Opcional) Insira as chaves manualmente. Elas possuem criptografia visual e não ficam salvas na nuvem:*")
-    manual_gemini = st.text_input("Chave Gemini (Google)", type="password")
-    manual_groq = st.text_input("Chave Groq (Llama 3)", type="password")
-    
-    if manual_gemini: st.session_state['chave_gemini_manual'] = manual_gemini
-    if manual_groq: st.session_state['chave_groq_manual'] = manual_groq
+st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 10px;'>QUANTUM OMNI SYSTEM v3.0 (CLEAN CORE)</p>", unsafe_allow_html=True)
 
 @st.cache_resource
 def inicializar_sistema():

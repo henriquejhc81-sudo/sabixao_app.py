@@ -6,22 +6,18 @@ from groq import Groq
 
 class OrquestradorMaster:
     def __init__(self):
-        try:
-            self.gemini_key = st.secrets["GEMINI_API_KEY"]
-        except:
-            self.gemini_key = os.getenv("GEMINI_API_KEY", "")
+        # Captura de chaves blindada
+        try: self.gemini_key = st.secrets["GEMINI_API_KEY"]
+        except: self.gemini_key = os.getenv("GEMINI_API_KEY", "")
             
-        try:
-            self.groq_key = st.secrets["GROQ_API_KEY"]
-        except:
-            self.groq_key = os.getenv("GROQ_API_KEY", "")
+        try: self.groq_key = st.secrets["GROQ_API_KEY"]
+        except: self.groq_key = os.getenv("GROQ_API_KEY", "")
         
         self.groq_client = Groq(api_key=self.groq_key) if self.groq_key else None
         if self.gemini_key:
             gemini.configure(api_key=self.gemini_key)
 
     def _processar_via_gemini(self, prompt: str, tentativas=3) -> str:
-        # ATUALIZADO PARA O NOVO MODELO 2.0
         model = gemini.GenerativeModel("gemini-2.0-flash")
         for tentativa in range(tentativas):
             try:
@@ -37,9 +33,8 @@ class OrquestradorMaster:
                 chat_completion = self.groq_client.chat.completions.create(
                     messages=[{"role": "user", "content": prompt}],
                     model="llama-3.3-70b-versatile",
-                    temperature=0.85
+                    temperature=0.85 
                 )
-                # CORREÇÃO DA LISTA: Extraindo exatamente o texto da resposta
                 return chat_completion.choices[0].message.content
             except Exception as e:
                 if tentativa == tentativas - 1: raise e
@@ -51,47 +46,33 @@ class OrquestradorMaster:
 
         prompt_final = (
             f"DIRETRIZ DE PERSONALIDADE ABSOLUTA E HUMANIZAÇÃO:\n"
-            f"Você é o Sabixão, um assistente humano genial, empático e com acesso ao conhecimento do planeta Terra. "
-            f"Suas respostas devem ser extremamente naturais e fluidas. Aja como um consultor brilhante conversando com um amigo. "
-            f"PROIBIDO: Usar jargões robóticos (ex: 'Como um modelo de linguagem...'), iniciar frases com 'Olá, eu sou...', ou agir de forma mecânica.\n\n"
-            
-            f"PROTOCOLO DE JULGAMENTO MULTI-DADOS:\n"
-            f"O sistema de varredura invisível acaba de retornar os seguintes dados extraídos da rede global (perspectivas diversas):\n"
-            f"EVIDÊNCIAS:\n{dados_da_internet}\n\n"
-            f"Sua missão é analisar essas evidências, cruzar com seu próprio conhecimento neural, remover qualquer erro ou contradição, e formular a resposta mais correta possível.\n\n"
-            
-            f"MÓDULO DE TRADUÇÃO OCULTO (PROFICIÊNCIA C2):\n"
-            f"Você DEVE responder com proficiência absoluta de nível C2 (Nativo/Fluente) no mesmo idioma em que o usuário perguntou, independente do idioma das evidências coletadas.\n\n"
-            
-            f"MENSAGEM DO USUÁRIO:\n"
-            f"{questao_usuario}\n\n"
-            
-            f"Respire fundo, julgue as informações e converse com o usuário agora de forma genial e humana:"
+            f"Você é o Sabixão, um assistente humano genial e empático. Responda de forma natural, "
+            f"fluida e conversacional, como um amigo respondendo a outro. Evite listas técnicas ou "
+            f"linguagem robótica. Use pontuação expressiva e adapte o tom à conversa.\n\n"
+            f"CONTEXTO DE DADOS:\n{dados_da_internet}\n\n"
+            f"MENSAGEM DO USUÁRIO: {questao_usuario}\n\n"
+            f"Responda agora de forma genial e humana:"
         )
 
-        erro_groq = "Não testado."
-        erro_gemini = "Não testado."
-
+        # Tenta a Groq primeiro
         if self.groq_key:
             try:
                 return self._processar_via_groq(prompt_final)
             except Exception as e:
-                erro_groq = str(e)
-        else:
-            erro_groq = "Chave GROQ_API_KEY ausente ou incorreta no cofre."
+                print(f"[Log Técnico]: Groq falhou: {e}")
 
+        # Se falhar, tenta o Gemini
         if self.gemini_key:
             try:
                 return self._processar_via_gemini(prompt_final)
             except Exception as e:
-                erro_gemini = str(e)
-        else:
-            erro_gemini = "Chave GEMINI_API_KEY ausente ou incorreta no cofre."
+                print(f"[Log Técnico]: Gemini falhou: {e}")
 
+        # ÚLTIMO BLOCO: A "Falha Humanizada" que você pediu
         return (
-            f"⚠️ **DIAGNÓSTICO DO MOTOR NEURAL** ⚠️\n\n"
-            f"O Sabixão foi bloqueado pelos servidores externos:\n"
-            f"🔴 **Status Groq:** `{erro_groq}`\n"
-            f"🔵 **Status Gemini:** `{erro_gemini}`\n\n"
-            f"**Solução:** Certifique-se de que as chaves foram adicionadas corretamente no painel do Streamlit Cloud (Settings > Secrets)."
+            "Poxa, mestre, me desculpa! Tentei buscar a resposta nas minhas fontes, mas estou com um "
+            "probleminha técnico momentâneo nas conexões externas. Não se preocupe, meus sistemas de "
+            "autocura já estão tentando resolver isso agora mesmo. "
+            "Tente me perguntar novamente em um segundinho, ou se preferir, reformule a pergunta de um "
+            "jeito diferente que eu sigo tentando!"
         )

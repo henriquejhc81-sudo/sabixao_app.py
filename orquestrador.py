@@ -50,10 +50,11 @@ class OrquestradorMaster:
             f"MENSAGEM/TESTE DO USUÁRIO: {questao_usuario}\n\n"
             f"CONTEXTO DE DADOS DA WEB: {dados_da_internet}\n\n"
             f"INSTRUÇÃO DE PROCESSAMENTO MENTAL (Siga rigorosamente):\n"
-            f"PASSO 1: Faça uma análise silenciosa e detalhada. Se for um teste com regras estruturais, CONTE AS FRASES meticulosamente (uma frase termina obrigatoriamente em '.', '!' ou '?'). Verifique restrições negativas e faça a checagem de fatos com fontes reais.\n"
+            f"PASSO 0 (PRÉ-PROCESSAMENTO/SANITIZAÇÃO): Ao copiar e colar de outras plataformas, o texto do usuário muitas vezes perde espaços e quebras de linha, chegando com palavras grudadas (ex: 'texto.Resposta ABrasília' ou 'país.Buenos Aires'). Identifique e SEPARE MENTALMENTE essas palavras e frases grudadas para restaurar o sentido original antes de avaliar qualquer coisa.\n"
+            f"PASSO 1: Faça uma análise silenciosa e detalhada do texto. Se for um teste com regras estruturais, CONTE AS FRASES meticulosamente (uma frase termina obrigatoriamente em '.', '!' ou '?') e conte as palavras de forma exata. Verifique restrições negativas (como adjetivos proibidos) e faça a checagem de fatos geográficos/históricos.\n"
             f"PASSO 2: Gere a sua resposta sem usar listas, bullet points ou tópicos robóticos (nunca escreva 'Veredicto:', 'Evidência:', etc.).\n"
             f"PASSO 3: Inicie a conversa de forma natural (ex: 'Fala, mestre!', 'Analisando isso aqui com cuidado...', etc.).\n"
-            f"PASSO 4: Logo após a saudação, entregue a sua avaliação estruturada em um ÚNICO PARÁGRAFO encorpado e coeso (Padrão Ouro de Data Annotation). Esse parágrafo deve conter intrinsecamente quem venceu, as evidências factuais, o impacto do erro e a correção.\n\n"
+            f"PASSO 4: Logo após a saudação, entregue a sua avaliação estruturada em um ÚNICO PARÁGRAFO encorpado e coeso (Padrão Ouro de Data Annotation). Esse parágrafo deve conter intrinsecamente quem venceu, as evidências factuais, a contagem exata que justificou a vitória/derrota, o impacto do erro e a correção.\n\n"
             f"Gere a sua resposta humana e super analítica agora:"
         )
 

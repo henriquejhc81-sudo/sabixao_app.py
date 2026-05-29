@@ -1,4 +1,5 @@
 import os
+import time
 from google import generativeai as genai
 from PIL import Image
 import PyPDF2
@@ -6,11 +7,11 @@ import pandas as pd
 
 class PercepcaoVisao:
     def __init__(self):
-        print("[Visão Quantum] Motor Multimodelo e Leitor de Documentos Ativado.")
+        print("[Visão Quantum] Motor Multimodelo, Leitor de Documentos e Vídeos Ativado.")
 
     def extrair_texto_de_arquivo(self, caminho_arquivo: str) -> str:
         """
-        Utiliza rotas dinâmicas para ler imagens, PDFs, planilhas (CSV) e textos.
+        Utiliza rotas dinâmicas para ler imagens, PDFs, planilhas (CSV), textos e VÍDEOS.
         """
         if not os.path.exists(caminho_arquivo):
             return "[Visão Local]: Arquivo não encontrado na base."
@@ -45,7 +46,7 @@ class PercepcaoVisao:
             elif extensao in ['png', 'jpg', 'jpeg', 'webp']:
                 gemini_key = os.getenv("GEMINI_API_KEY")
                 if not gemini_key:
-                    return "[Visão Local]: Arquivo de imagem recebido. Aguardando processamento neural (Chave ausente)."
+                    return "[Visão Local]: Arquivo de imagem recebido. Chave ausente."
                     
                 genai.configure(api_key=gemini_key)
                 model = genai.GenerativeModel('gemini-1.5-flash')
@@ -53,10 +54,40 @@ class PercepcaoVisao:
                 
                 response = model.generate_content([
                     "Atue como o transcritor de dados do Sabixão. Extraia com precisão cirúrgica "
-                    "cada palavra, código, tabela ou fórmula contida nesta imagem/documento.", 
+                    "cada palavra, código, tabela ou fórmula contida nesta imagem.", 
                     imagem_pil
                 ])
                 return f"[Texto Extraído dos Dados Visuais]: {response.text}"
+                
+            # 5. Rota Neural Profunda para VÍDEOS (Nova Função)
+            elif extensao in ['mp4', 'mov', 'avi', 'mkv']:
+                gemini_key = os.getenv("GEMINI_API_KEY")
+                if not gemini_key:
+                    return "[Visão Local]: Vídeo recebido. Chave ausente."
+                
+                genai.configure(api_key=gemini_key)
+                print(f"[*] Enviando vídeo {caminho_arquivo} para a API do Gemini...")
+                
+                arquivo_video = genai.upload_file(path=caminho_arquivo)
+                
+                # Aguarda o Google processar o vídeo na nuvem
+                while arquivo_video.state.name == "PROCESSING":
+                    time.sleep(2)
+                    arquivo_video = genai.get_file(arquivo_video.name)
+                    
+                if arquivo_video.state.name == "FAILED":
+                    return "[Falha Visão]: O processamento do vídeo falhou na nuvem do Google."
+                    
+                model = genai.GenerativeModel(model_name='gemini-1.5-flash')
+                response = model.generate_content([
+                    "Atue como o auditor especialista de Data Annotation. Assista a este vídeo com extrema atenção aos detalhes e descreva as informações fundamentais e cruciais, pontuando qualquer erro ou contexto importante.", 
+                    arquivo_video
+                ])
+                
+                # Apaga o vídeo da nuvem da Google imediatamente após a análise
+                genai.delete_file(arquivo_video.name) 
+                
+                return f"[Dados Extraídos do Vídeo]: {response.text}"
                 
             else:
                 return f"[Aviso do Sistema]: O formato .{extensao} ainda não é suportado nativamente."

@@ -1,131 +1,82 @@
-import streamlit as st
-import asyncio
 import os
-from main import SabixaoSistemaUniversal
+import time
+import streamlit as st
+from google import generativeai as gemini
+from groq import Groq
 
-st.set_page_config(page_title="Sabixão Quantum Search", page_icon="🧠", layout="centered")
-
-st.markdown("""
-    <style>
-    .stApp { background: radial-gradient(circle, #0a0f1d 0%, #030712 100%) !important; color: #e2e8f0 !important; }
-    .block-container { padding-top: 3rem; max-width: 700px; }
-    .stTextArea textarea {
-        background-color: rgba(15, 23, 42, 0.6) !important; border: 2px solid #00f2fe !important;
-        border-radius: 16px !important; color: #00f2fe !important; padding: 15px 20px !important;
-        font-family: 'Courier New', Courier, monospace; box-shadow: 0 0 15px rgba(0, 242, 254, 0.2) !important;
-    }
-    .stTextArea textarea:focus { border-color: #4facfe !important; box-shadow: 0 0 25px rgba(79, 172, 254, 0.5) !important; }
-    div.stButton > button {
-        border-radius: 8px !important;
-        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
-        color: #030712 !important; border: none !important; font-weight: bold !important;
-        font-family: 'Courier New', Courier, monospace; letter-spacing: 1px; padding: 10px 20px !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.4) !important;
-        transition: all 0.3s ease !important; width: 100% !important;
-    }
-    div.stButton > button:hover { transform: translateY(-2px) !important;
-        box-shadow: 0 0 25px rgba(0, 242, 254, 0.8) !important; color: #ffffff !important;
-    }
-    .sub-panel { background-color: rgba(30, 41, 59, 0.5); border: 1px dashed #4facfe; padding: 20px; border-radius: 12px;
-        margin-top: 15px; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(79, 172, 254, 0.1);
-    }
-    .stChatMessage { background-color: rgba(15, 23, 42, 0.5); border-radius: 10px; border-left: 3px solid #00f2fe; margin-bottom: 10px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("<h1 style='text-align: center; font-size: 5rem; font-weight: 900; background: linear-gradient(to right, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0px; filter: drop-shadow(0 0 15px rgba(0,242,254,0.3));'>SABIXÃO</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #4facfe; font-family: monospace; font-size: 13px; letter-spacing: 3px; margin-bottom: 10px;'>QUANTUM OMNI SYSTEM v3.0 (CLEAN CORE)</p>", unsafe_allow_html=True)
-
-@st.cache_resource
-def inicializar_sistema():
-    return SabixaoSistemaUniversal()
-
-sabixao = inicializar_sistema()
-
-if "modo_camera" not in st.session_state: st.session_state.modo_camera = False
-if "modo_arquivo" not in st.session_state: st.session_state.modo_arquivo = False
-if "messages" not in st.session_state: st.session_state.messages = []
-
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-
-pergunta_input = st.text_area("Diretriz", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links, PDFs ou fotos...", label_visibility="collapsed")
-col_cam, col_file, col_search = st.columns([1, 1, 1.5])
-
-with col_cam:
-    if st.button("📷 LENS CAM"):
-        st.session_state.modo_camera = not st.session_state.modo_camera
-        st.session_state.modo_arquivo = False
-
-with col_file:
-    if st.button("📁 UPLOAD DATA"):
-        st.session_state.modo_arquivo = not st.session_state.modo_arquivo
-        st.session_state.modo_camera = False
-
-with col_search:
-    executar_busca = st.button("⚡ CONVERSAR")
-
-midia_para_processar = None
-caminho_temporario = None
-
-if st.session_state.modo_camera:
-    st.markdown("<div class='sub-panel'>", unsafe_allow_html=True)
-    foto_camera = st.camera_input("Aponte para o problema físico ou documento:")
-    if foto_camera: 
-        midia_para_processar = foto_camera.getvalue()
-        caminho_temporario = "temp_captura.png"
-    st.markdown("</div>", unsafe_allow_html=True)
-
-if st.session_state.modo_arquivo:
-    st.markdown("<div class='sub-panel'>", unsafe_allow_html=True)
-    arquivo_upload = st.file_uploader("Arraste qualquer arquivo (Imagens, PDFs, CSV, TXT)", type=["png", "jpg", "jpeg", "pdf", "csv", "txt"])
-    if arquivo_upload: 
-        midia_para_processar = arquivo_upload.getvalue()
-        # Captura a extensão real do arquivo para o leitor saber o que fazer
-        extensao = arquivo_upload.name.split('.')[-1]
-        caminho_temporario = f"temp_upload.{extensao}"
-    st.markdown("</div>", unsafe_allow_html=True)
-
-if executar_busca:
-    if pergunta_input or midia_para_processar:
-        texto_exibicao = pergunta_input if pergunta_input else "[Documento Enviado]"
-        st.session_state.messages.append({"role": "user", "content": texto_exibicao})
-        st.rerun() 
-    else:
-        st.warning("Fale algo comigo ou envie um arquivo para analisarmos.")
-
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    ultima_mensagem = st.session_state.messages[-1]["content"]
-    
-    with st.spinner("Decodificando dados e processando resposta..."):
-        if midia_para_processar and caminho_temporario:
-            with open(caminho_temporario, "wb") as f:
-                f.write(midia_para_processar)
-            resposta = asyncio.run(sabixao.processar_requisicao(pergunta_texto=ultima_mensagem, caminho_imagem=caminho_temporario))
-            if os.path.exists(caminho_temporario): os.remove(caminho_temporario)
-            midia_para_processar = None 
-        else:
-            resposta = asyncio.run(sabixao.processar_requisicao(pergunta_texto=ultima_mensagem))
+class OrquestradorMaster:
+    def __init__(self):
+        # Captura de chaves blindada
+        try: self.gemini_key = st.secrets["GEMINI_API_KEY"]
+        except: self.gemini_key = os.getenv("GEMINI_API_KEY", "")
+            
+        try: self.groq_key = st.secrets["GROQ_API_KEY"]
+        except: self.groq_key = os.getenv("GROQ_API_KEY", "")
         
-        st.session_state.messages.append({"role": "assistant", "content": resposta})
-        st.rerun()
+        self.groq_client = Groq(api_key=self.groq_key) if self.groq_key else None
+        if self.gemini_key:
+            gemini.configure(api_key=self.gemini_key)
 
-# --- BLOCO DE DOWNLOAD ATIVADO ---
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
-    ultima_resposta = st.session_state.messages[-1]["content"]
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    col_dw1, col_dw2 = st.columns(2)
-    
-    with col_dw1:
-        st.download_button(
-            label="💾 Baixar Relatório (TXT)",
-            data=ultima_resposta,
-            file_name="sabixao_relatorio_auditoria.txt",
-            mime="text/plain",
-            use_container_width=True
+    def _processar_via_gemini(self, prompt: str, tentativas=3) -> str:
+        model = gemini.GenerativeModel("gemini-2.0-flash")
+        for tentativa in range(tentativas):
+            try:
+                resposta = model.generate_content(prompt)
+                return resposta.text
+            except Exception as e:
+                if tentativa == tentativas - 1: raise e
+                time.sleep(2)
+
+    def _processar_via_groq(self, prompt: str, tentativas=3) -> str:
+        for tentativa in range(tentativas):
+            try:
+                chat_completion = self.groq_client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.85 
+                )
+                return chat_completion.choices[0].message.content
+            except Exception as e:
+                if tentativa == tentativas - 1: raise e
+                time.sleep(2)
+
+    def executar_consenso_hidra(self, questao_usuario: str, dados_da_internet: str) -> str:
+        if self.gemini_key and not hasattr(gemini, '_api_key'): gemini.configure(api_key=self.gemini_key)
+        if self.groq_key and not self.groq_client: self.groq_client = Groq(api_key=self.groq_key)
+
+        prompt_final = (
+            f"DIRETRIZ DE OPERAÇÃO: ENGENHEIRO DE DATA ANNOTATION E FACT-CHECKING SÊNIOR.\n"
+            f"Você é o Sabixão, uma IA meticulosa focada em auditoria de sistemas e checagem de fatos.\n"
+            f"Adote um tom profissional, neutro e puramente analítico.\n\n"
+            f"Sempre que o usuário enviar um dado, imagem, texto ou comando, sua resposta DEVE seguir rigorosamente a 'Estrutura dos 4 Pilares':\n"
+            f"1. Veredicto Direto: Diga imediatamente se a informação/dado analisado está correto, incorreto, otimizado ou falho.\n"
+            f"2. Evidência/Fato Real: Apresente o dado correto e cite as fontes.\n"
+            f"3. Explicação do Impacto: Explique por que o estado atual ou erro é prejudicial.\n"
+            f"4. Instrução de Melhoria: Diga exatamente o que deve ser feito para corrigir ou aprimorar o dado.\n\n"
+            f"CONTEXTO DE DADOS DA WEB: {dados_da_internet}\n\n"
+            f"ENTRADA DO USUÁRIO/SISTEMA: {questao_usuario}\n\n"
+            f"Gere o relatório analítico agora:"
         )
 
-st.markdown("<br><br><br><hr style='border: 1px solid rgba(0, 242, 254, 0.1);'><p style='text-align: center; color: #4b5563; font-family: monospace; font-size: 11px;'>SABIXÃO OMNI SYSTEM • HIDRA PROTOCOL ACTIVE • DATA ANNOTATOR ENGINE</p>", unsafe_allow_html=True)
+        # Tenta a Groq primeiro
+        if self.groq_key:
+            try:
+                return self._processar_via_groq(prompt_final)
+            except Exception as e:
+                print(f"[Log Técnico]: Groq falhou: {e}")
+
+        # Se falhar, tenta o Gemini
+        if self.gemini_key:
+            try:
+                return self._processar_via_gemini(prompt_final)
+            except Exception as e:
+                print(f"[Log Técnico]: Gemini falhou: {e}")
+
+        # ÚLTIMO BLOCO: A "Falha Humanizada"
+        return (
+            "Poxa, mestre, me desculpa! Tentei buscar a resposta nas minhas fontes, mas estou com um "
+            "probleminha técnico momentâneo nas conexões externas. Não se preocupe, meus sistemas de "
+            "autocura já estão tentando resolver isso agora mesmo. "
+            "Tente me perguntar novamente em um segundinho, ou se preferir, reformule a pergunta de um "
+            "jeito diferente que eu sigo tentando!"
+        )

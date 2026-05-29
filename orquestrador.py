@@ -50,12 +50,16 @@ class OrquestradorMaster:
             f"MENSAGEM/TESTE DO USUÁRIO: {questao_usuario}\n\n"
             f"CONTEXTO DE DADOS DA WEB: {dados_da_internet}\n\n"
             f"INSTRUÇÃO DE PROCESSAMENTO MENTAL (Siga rigorosamente):\n"
-            f"PASSO 0 (PRÉ-PROCESSAMENTO/SANITIZAÇÃO): Ao copiar e colar de outras plataformas, o texto do usuário muitas vezes perde espaços e quebras de linha, chegando com palavras grudadas (ex: 'texto.Resposta ABrasília' ou 'país.Buenos Aires'). Identifique e SEPARE MENTALMENTE essas palavras e frases grudadas para restaurar o sentido original antes de avaliar qualquer coisa.\n"
-            f"PASSO 1: Faça uma análise silenciosa e detalhada do texto. Se for um teste com regras estruturais, CONTE AS FRASES meticulosamente (uma frase termina obrigatoriamente em '.', '!' ou '?') e conte as palavras de forma exata. Verifique restrições negativas (como adjetivos proibidos) e faça a checagem de fatos geográficos/históricos.\n"
-            f"PASSO 2: Gere a sua resposta sem usar listas, bullet points ou tópicos robóticos (nunca escreva 'Veredicto:', 'Evidência:', etc.).\n"
-            f"PASSO 3: Inicie a conversa de forma natural (ex: 'Fala, mestre!', 'Analisando isso aqui com cuidado...', etc.).\n"
-            f"PASSO 4: Logo após a saudação, entregue a sua avaliação estruturada em um ÚNICO PARÁGRAFO encorpado e coeso (Padrão Ouro de Data Annotation). Esse parágrafo deve conter intrinsecamente quem venceu, as evidências factuais, a contagem exata que justificou a vitória/derrota, o impacto do erro e a correção.\n\n"
-            f"Gere a sua resposta humana e super analítica agora:"
+            f"PASSO 0 (PRÉ-PROCESSAMENTO/SANITIZAÇÃO): Ao copiar e colar, o texto do usuário muitas vezes perde espaços (ex: 'texto.Resposta A'). SEPARE MENTALMENTE essas palavras grudadas antes de avaliar.\n"
+            f"PASSO 1 (AUDITORIA MATEMÁTICA E FÁTICA): Faça uma análise silenciosa e detalhada. \n"
+            f"- SE HOUVER REGRA DE CONTAGEM DE PALAVRAS: Conte CADA string separada por espaço como UMA palavra. Lembre-se que números de listas (ex: '1.', '2.') CONTAM como palavras. \n"
+            f"- SE HOUVER REGRA DE CONTAGEM DE FRASES: Uma frase termina obrigatoriamente em '.', '!' ou '?'. \n"
+            f"- CAÇA A ADJETIVOS: Seja implacável. Identifique adjetivos pátrios (ex: brasileiro, argentina), adjetivos de posição/qualidade (ex: federal, famosa, norte, próxima).\n"
+            f"- GEOGRAFIA/FATOS: Valide tudo com dados reais. Nunca invente imprecisões geográficas.\n"
+            f"PASSO 2 (ESTRUTURA PROIBIDA): É ABSOLUTAMENTE PROIBIDO usar formatação de listas, bullet points, números, quebras de linha ou marcações robóticas (como 'Evidência:', 'Impacto:', 'Veredicto:').\n"
+            f"PASSO 3 (SAUDAÇÃO): Inicie a conversa de forma humana (ex: 'Fala, mestre!', 'Dei uma olhada minuciosa nisso aqui...').\n"
+            f"PASSO 4 (O RELATÓRIO): Logo após a saudação, na mesma linha ou logo abaixo, entregue o seu relatório de Data Annotation em UM ÚNICO PARÁGRAFO TEXTUAL CONTÍNUO. Este único parágrafo deve conter quem venceu (ou se ambas falharam), a contagem exata que provou a falha/vitória, os adjetivos encontrados e o impacto. Tudo em formato de prosa.\n\n"
+            f"Gere a sua resposta humana e super analítica agora em UM ÚNICO PARÁGRAFO:"
         )
 
         # Tenta a Groq primeiro (Velocidade)

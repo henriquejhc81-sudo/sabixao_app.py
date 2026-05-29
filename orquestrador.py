@@ -44,7 +44,7 @@ class OrquestradorMaster:
         if self.gemini_key and not hasattr(gemini, '_api_key'): gemini.configure(api_key=self.gemini_key)
         if self.groq_key and not self.groq_client: self.groq_client = Groq(api_key=self.groq_key)
 
- prompt_final = (
+        prompt_final = (
             f"DIRETRIZ DE OPERAÇÃO: ENGENHEIRO DE DATA ANNOTATION E FACT-CHECKING SÊNIOR.\n"
             f"Você é o Sabixão, uma IA meticulosa focada em auditoria de sistemas e checagem de fatos.\n"
             f"Adote um tom profissional, neutro e puramente analítico.\n\n"
@@ -72,7 +72,7 @@ class OrquestradorMaster:
             except Exception as e:
                 print(f"[Log Técnico]: Gemini falhou: {e}")
 
-        # ÚLTIMO BLOCO: A "Falha Humanizada" que você pediu
+        # ÚLTIMO BLOCO: A "Falha Humanizada"
         return (
             "Poxa, mestre, me desculpa! Tentei buscar a resposta nas minhas fontes, mas estou com um "
             "probleminha técnico momentâneo nas conexões externas. Não se preocupe, meus sistemas de "

@@ -16,14 +16,21 @@ st.markdown("""
     }
     .stTextArea textarea:focus { border-color: #4facfe !important; box-shadow: 0 0 25px rgba(79, 172, 254, 0.5) !important; }
     div.stButton > button {
-        border-radius: 8px !important; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+        border-radius: 8px !important;
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
         color: #030712 !important; border: none !important; font-weight: bold !important;
         font-family: 'Courier New', Courier, monospace; letter-spacing: 1px; padding: 10px 20px !important;
-        box-shadow: 0 0 15px rgba(0, 242, 254, 0.4) !important; transition: all 0.3s ease !important; width: 100% !important;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.4) !important;
+        transition: all 0.3s ease !important; width: 100% !important;
     }
-    div.stButton > button:hover { transform: translateY(-2px) !important; box-shadow: 0 0 25px rgba(0, 242, 254, 0.8) !important; color: #ffffff !important; }
-    .sub-panel { background-color: rgba(30, 41, 59, 0.5); border: 1px dashed #4facfe; padding: 20px; border-radius: 12px; margin-top: 15px; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(79, 172, 254, 0.1); }
-    .stChatMessage { background-color: rgba(15, 23, 42, 0.5); border-radius: 10px; border-left: 3px solid #00f2fe; margin-bottom: 10px; }
+    div.stButton > button:hover { transform: translateY(-2px) !important;
+        box-shadow: 0 0 25px rgba(0, 242, 254, 0.8) !important; color: #ffffff !important;
+    }
+    .sub-panel { background-color: rgba(30, 41, 59, 0.5); border: 1px dashed #4facfe; padding: 20px; border-radius: 12px;
+        margin-top: 15px; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(79, 172, 254, 0.1);
+    }
+    .stChatMessage { background-color: rgba(15, 23, 42, 0.5); border-radius: 10px; border-left: 3px solid #00f2fe; margin-bottom: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -44,7 +51,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-pergunta_input = st.text_area("Diretriz", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links ou faça perguntas...", label_visibility="collapsed")
+pergunta_input = st.text_area("Diretriz", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links, PDFs ou fotos...", label_visibility="collapsed")
 col_cam, col_file, col_search = st.columns([1, 1, 1.5])
 
 with col_cam:
@@ -61,23 +68,29 @@ with col_search:
     executar_busca = st.button("⚡ CONVERSAR")
 
 midia_para_processar = None
-caminho_temporario = "temp_captura.png"
+caminho_temporario = None
 
 if st.session_state.modo_camera:
     st.markdown("<div class='sub-panel'>", unsafe_allow_html=True)
     foto_camera = st.camera_input("Aponte para o problema físico ou documento:")
-    if foto_camera: midia_para_processar = foto_camera.getvalue()
+    if foto_camera: 
+        midia_para_processar = foto_camera.getvalue()
+        caminho_temporario = "temp_captura.png"
     st.markdown("</div>", unsafe_allow_html=True)
 
 if st.session_state.modo_arquivo:
     st.markdown("<div class='sub-panel'>", unsafe_allow_html=True)
-    arquivo_upload = st.file_uploader("Arraste qualquer tipo de arquivo (Imagens, Textos)", type=None)
-    if arquivo_upload: midia_para_processar = arquivo_upload.getvalue()
+    arquivo_upload = st.file_uploader("Arraste qualquer arquivo (Imagens, PDFs, CSV, TXT)", type=["png", "jpg", "jpeg", "pdf", "csv", "txt"])
+    if arquivo_upload: 
+        midia_para_processar = arquivo_upload.getvalue()
+        # Captura a extensão real do arquivo para o leitor saber o que fazer
+        extensao = arquivo_upload.name.split('.')[-1]
+        caminho_temporario = f"temp_upload.{extensao}"
     st.markdown("</div>", unsafe_allow_html=True)
 
 if executar_busca:
     if pergunta_input or midia_para_processar:
-        texto_exibicao = pergunta_input if pergunta_input else "[Arquivo Enviado]"
+        texto_exibicao = pergunta_input if pergunta_input else "[Documento Enviado]"
         st.session_state.messages.append({"role": "user", "content": texto_exibicao})
         st.rerun() 
     else:
@@ -86,8 +99,8 @@ if executar_busca:
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     ultima_mensagem = st.session_state.messages[-1]["content"]
     
-    with st.spinner("Pensando..."):
-        if midia_para_processar:
+    with st.spinner("Decodificando dados e processando resposta..."):
+        if midia_para_processar and caminho_temporario:
             with open(caminho_temporario, "wb") as f:
                 f.write(midia_para_processar)
             resposta = asyncio.run(sabixao.processar_requisicao(pergunta_texto=ultima_mensagem, caminho_imagem=caminho_temporario))
@@ -98,7 +111,8 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
         
         st.session_state.messages.append({"role": "assistant", "content": resposta})
         st.rerun()
-# Adicione este bloco logo APÓS o st.rerun() dentro do loop de respostas do asistente
+
+# --- BLOCO DE DOWNLOAD ATIVADO ---
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
     ultima_resposta = st.session_state.messages[-1]["content"]
     
@@ -109,8 +123,9 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "assis
         st.download_button(
             label="💾 Baixar Relatório (TXT)",
             data=ultima_resposta,
-            file_name="sabixao_analise_fact_checking.txt",
+            file_name="sabixao_relatorio_auditoria.txt",
             mime="text/plain",
             use_container_width=True
         )
-st.markdown("<br><br><br><hr style='border: 1px solid rgba(0, 242, 254, 0.1);'><p style='text-align: center; color: #4b5563; font-family: monospace; font-size: 11px;'>SABIXÃO OMNI SYSTEM • HIDRA PROTOCOL ACTIVE • HUMANIZED ENGINE</p>", unsafe_allow_html=True)
+
+st.markdown("<br><br><br><hr style='border: 1px solid rgba(0, 242, 254, 0.1);'><p style='text-align: center; color: #4b5563; font-family: monospace; font-size: 11px;'>SABIXÃO OMNI SYSTEM • HIDRA PROTOCOL ACTIVE • DATA ANNOTATOR ENGINE</p>", unsafe_allow_html=True)

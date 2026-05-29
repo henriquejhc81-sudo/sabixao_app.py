@@ -51,7 +51,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-pergunta_input = st.text_area("Diretriz", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links, PDFs ou fotos...", label_visibility="collapsed")
+pergunta_input = st.text_area("Diretriz", placeholder="[CONEXÃO SEGURA] Fale comigo naturalmente, envie links, vídeos, PDFs ou fotos...", label_visibility="collapsed")
 col_cam, col_file, col_search = st.columns([1, 1, 1.5])
 
 with col_cam:
@@ -72,7 +72,7 @@ caminho_temporario = None
 
 if st.session_state.modo_camera:
     st.markdown("<div class='sub-panel'>", unsafe_allow_html=True)
-    foto_camera = st.camera_input("Aponte para o problema físico ou documento:")
+    foto_camera = st.camera_input("Tire uma foto ao vivo pelo navegador:")
     if foto_camera: 
         midia_para_processar = foto_camera.getvalue()
         caminho_temporario = "temp_captura.png"
@@ -80,17 +80,16 @@ if st.session_state.modo_camera:
 
 if st.session_state.modo_arquivo:
     st.markdown("<div class='sub-panel'>", unsafe_allow_html=True)
-    arquivo_upload = st.file_uploader("Arraste qualquer arquivo (Imagens, PDFs, CSV, TXT)", type=["png", "jpg", "jpeg", "pdf", "csv", "txt"])
+    arquivo_upload = st.file_uploader("Envie Arquivos, Imagens ou Grave Vídeos", type=["png", "jpg", "jpeg", "pdf", "csv", "txt", "mp4", "mov", "avi"])
     if arquivo_upload: 
         midia_para_processar = arquivo_upload.getvalue()
-        # Captura a extensão real do arquivo para o leitor saber o que fazer
         extensao = arquivo_upload.name.split('.')[-1]
         caminho_temporario = f"temp_upload.{extensao}"
     st.markdown("</div>", unsafe_allow_html=True)
 
 if executar_busca:
     if pergunta_input or midia_para_processar:
-        texto_exibicao = pergunta_input if pergunta_input else "[Documento Enviado]"
+        texto_exibicao = pergunta_input if pergunta_input else "[Arquivo ou Vídeo Enviado]"
         st.session_state.messages.append({"role": "user", "content": texto_exibicao})
         st.rerun() 
     else:
@@ -99,7 +98,7 @@ if executar_busca:
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     ultima_mensagem = st.session_state.messages[-1]["content"]
     
-    with st.spinner("Decodificando dados e processando resposta..."):
+    with st.spinner("Decodificando matriz de dados. Isso pode levar alguns segundos se for um vídeo..."):
         if midia_para_processar and caminho_temporario:
             with open(caminho_temporario, "wb") as f:
                 f.write(midia_para_processar)

@@ -7,3 +7,5 @@ beautifulsoup4
 youtube-transcript-api
 Pillow
 requests
+PyPDF2
+pandas

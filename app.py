@@ -98,5 +98,19 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
         
         st.session_state.messages.append({"role": "assistant", "content": resposta})
         st.rerun()
-
+# Adicione este bloco logo APÓS o st.rerun() dentro do loop de respostas do asistente
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+    ultima_resposta = st.session_state.messages[-1]["content"]
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_dw1, col_dw2 = st.columns(2)
+    
+    with col_dw1:
+        st.download_button(
+            label="💾 Baixar Relatório (TXT)",
+            data=ultima_resposta,
+            file_name="sabixao_analise_fact_checking.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
 st.markdown("<br><br><br><hr style='border: 1px solid rgba(0, 242, 254, 0.1);'><p style='text-align: center; color: #4b5563; font-family: monospace; font-size: 11px;'>SABIXÃO OMNI SYSTEM • HIDRA PROTOCOL ACTIVE • HUMANIZED ENGINE</p>", unsafe_allow_html=True)

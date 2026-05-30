@@ -38,12 +38,12 @@ class PercepcaoVisao:
                 if not gemini_key: return "[Aviso]: Chave API ausente para visão."
                     
                 genai.configure(api_key=gemini_key)
-                # Forçando a versão mais estável para evitar o erro v1beta
-                model = genai.GenerativeModel('models/gemini-1.5-flash')
+                # Sincronizado com o modelo exato que já funciona no orquestrador
+                model = genai.GenerativeModel('gemini-2.0-flash')
                 imagem_pil = Image.open(caminho_arquivo)
                 
                 response = model.generate_content([
-                    "Descreva e extraia todos os textos, códigos ou elementos desta imagem com precisão máxima.", 
+                    "Descreva detalhadamente o que há nesta imagem, extraindo todos os textos, códigos ou elementos visuais importantes de forma clara.", 
                     imagem_pil
                 ])
                 return response.text
@@ -62,7 +62,8 @@ class PercepcaoVisao:
                 if arquivo_video.state.name == "FAILED":
                     return "[Erro]: Falha no processamento do vídeo na nuvem."
                     
-                model = genai.GenerativeModel('models/gemini-1.5-flash')
+                # Sincronizado para vídeo também
+                model = genai.GenerativeModel('gemini-2.0-flash')
                 response = model.generate_content([
                     "Assista a este vídeo com extrema atenção aos detalhes e transcreva/descreva as informações fundamentais.", 
                     arquivo_video
@@ -74,4 +75,5 @@ class PercepcaoVisao:
                 return f"[Sistema]: O formato .{extensao} não é suportado nativamente."
                 
         except Exception as e:
-            return f"[Erro Técnico de Visão]: Ocorreu uma instabilidade na API (Possível falha de conexão ou modelo não suportado nesta região). Detalhe: {str(e)}"
+            # Mensagem mais clara caso a API falhe novamente, para o Orquestrador entender que é erro técnico e não um teste.
+            return f"ERRO TÉCNICO INTERNO NA API DE VISÃO COMPUTACIONAL: {str(e)}"

@@ -49,7 +49,7 @@ class OrquestradorMaster:
             try:
                 chat = self.openai_client.chat.completions.create(
                     messages=[{"role": "user", "content": prompt}],
-                    model="gpt-4o-mini", # Rápido e absurdamente inteligente
+                    model="gpt-4o-mini",
                     temperature=0.7
                 )
                 return chat.choices[0].message.content
@@ -69,7 +69,7 @@ class OrquestradorMaster:
             f"PASSO 2 (EXECUÇÃO ADAPTATIVA):\n"
             f"-> SE FOR TESTE DE LÓGICA/REGRAS: Seja implacável. Conte frases pela pontuação. Conte itens numéricos de listas como palavras. Cace adjetivos.\n"
             f"-> SE FOR UMA FOTO/ARQUIVO COM PERGUNTA: Responda de forma brilhante sobre os dados.\n"
-            f"-> SE FOR ERRO DE SISTEMA/429: Explique que o limite estourou amigavelmente.\n"
+            f"-> SE FOR ERRO DE SISTEMA/429: Explique que o limite visual estourou momentaneamente e peça para o usuário aguardar.\n"
             f"PASSO 3 (FORMATO E TOM): Inicie com uma saudação humana (ex: 'Fala, mestre!'). Nunca use jargões robóticos. Escreva sua resposta em formato agradável e coeso.\n\n"
             f"Gere a sua resposta agora:"
         )
